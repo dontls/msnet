@@ -19,7 +19,6 @@
 
  * faac `./bootstrap && ./configure && make`
 
+##### serve
 
-##### 
-
- * htttpflv: http://localhost:10600/live/livedsssssssss.flv
+ * httpflv: http://localhost:10600/live/livedsssssssss.flv
