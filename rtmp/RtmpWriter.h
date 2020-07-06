@@ -1,5 +1,5 @@
-#ifndef RTMP_PUBLISH_H
-#define RTMP_PUBLISH_H
+#ifndef RTMP_WRITER_H
+#define RTMP_WRITER_H
 
 #ifdef SRS_LIBRTMP
 #include "srs/srs_librtmp.h"
@@ -7,31 +7,42 @@
 #include "librtmp/log.h"
 #include "rtmp.h"
 #endif
+#include "AVg726ToAac.h"
+// #include "AVmp4.h"
+// #include "fpWriter.h"
 #include <functional>
-
+#include <string>
 
 class RtmpWriter {
 private:
-    const char* _errMsg;
+    AVg726ToAac        _g726ToAac;
+    const char*        _errMsg;
+    int                _errCode;
+    unsigned long long _startVTime;
+    unsigned long long _startATime;
+    bool               _isWaitKeyframe;
+    int                _frameType;
     // 发布流
 #ifdef SRS_LIBRTMP
     srs_rtmp_t _rtmp;
+    AVg726     _avg726;
 #else
     RTMP*                                            _rtmp;
     std::function<int(RTMP*, std::string, uint32_t)> _publishFunc;
 #endif
+    // fpWriter    _g726Writer;
+    // AVmp4       _mp4Writer;
+    std::string _fpName;
+
 public:
-    RtmpWriter(/* args */);
+    RtmpWriter();
     ~RtmpWriter();
 
-public:
-    bool init(const char* session, int frameType);
+    bool        initUrl(const char* url);
+    const char* errorMsg();
+    int         errorCode();
 
-    void writeVideoFrame(std::string strNalu, uint32_t dts);
-
-    void writeAudioFrame(unsigned char* data, int len, uint32_t dts, bool isAudio = true);
-
-private:
-    bool initUrl(const char* url);
+    void publishVideoframe(char* frame, int len, int type, unsigned long long pts);
+    void publishAudioframe(char* frame, int len, unsigned long long pts);
 };
 #endif
