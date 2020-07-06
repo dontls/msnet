@@ -1,6 +1,7 @@
 #include "FlvConn.h"
 #include "FlvWriter.h"
 #include "Log.h"
+#include "String.h"
 
 const char HTTPFlv_Header[] = { 0x46, 0x4c, 0x56, 0x01, 0x01, 0x00, 0x00, 0x00, 0x09, 0x00, 0x00, 0x00, 0x00 };
 
@@ -18,11 +19,10 @@ void FlvConn::start()
 {
     asio::ip::tcp::no_delay noDelay(true);
     _socket.set_option(noDelay);
-    _devID = "live_20198002_01_00";
     doRead();
 }
 
-void FlvConn::rawWriteFlvPacket(const char* data, uint32_t len,  const char* aacSpec, uint32_t aacSpecLen, int vTagType)
+void FlvConn::rawWriteFlvPacket(const char* data, uint32_t len, const char* aacSpec, uint32_t aacSpecLen, int vTagType)
 {
     // 等待sps/pps 并且直发一次
     if (_isWaitMeta && vTagType == 8) {
@@ -31,31 +31,59 @@ void FlvConn::rawWriteFlvPacket(const char* data, uint32_t len,  const char* aac
     if (_isWaitMeta) {
         return;
     }
-    if(vTagType == 8) {
+    if (vTagType == 8) {
         doWrite(aacSpec, aacSpecLen);
     }
     doWrite(data, len);
 }
 
-// http://localhost:10600/live?devID=id&chn=1&session=1222222222222222222222
+// http://localhost:10600/live/session1222222222222222222222.flv
+bool FlvConn::flvHTTPUrlParse(const char* request, int len)
+{
+    std::istringstream istr(request);
+    std::string        firstLine;
+    std::getline(istr, firstLine);
+    LOG("%s\n", firstLine.c_str());
+    std::vector<std::string> v = string_split(firstLine, " ");
+    if (v.size() != 3) {
+        return false;
+    }
+    std::string method = v[0];
+    if (method.compare("GET") != 0) {
+        return false;
+    }
+    std::string            url = v[1];
+    std::string::size_type pos = std::string::npos;
+    if (url.find(".flv") == pos) {
+        return false;
+    }
+
+    pos = url.find_last_of("/");
+    const char* sstr = url.c_str() + pos + 1;
+    std::string ss(sstr, strlen(sstr) - 4);
+    _sessionId = ss;
+    return true;
+}
+
 void FlvConn::doRead()
 {
     auto self(shared_from_this());
-    _socket.async_read_some(asio::buffer(_buffer), [this, self](std::error_code ec, std::size_t bytes_transferred) {
-        if (!ec) {
-            LOG("\n%s\n", _buffer.data());
-            doWrite(HTTPFlv_Rsp.c_str(),
-                    HTTPFlv_Rsp.length());  // 1、http请求响应 Content_Length: 不设置client可以一直接收数据
-            doWrite(HTTPFlv_Header, sizeof(HTTPFlv_Header));                       // 2、发送flv头
-            FlvWriter_Ptr flvWriter = FlvWriterManager::ins()->flvWriter(_devID);  // 3、添加到列表
-            if (flvWriter) {
-                flvWriter->addFlvWriterConn(shared_from_this());
+    _socket.async_read_some(
+        asio::buffer(_buffer, BUFSIZ), [this, self](std::error_code ec, std::size_t bytes_transferred) {
+            if (!ec && flvHTTPUrlParse(_buffer, bytes_transferred)) {
+                LOG("\n%s\n", _buffer);
+                doWrite(HTTPFlv_Rsp.c_str(),
+                        HTTPFlv_Rsp.length());  // 1、http请求响应 Content_Length: 不设置client可以一直接收数据
+                doWrite(HTTPFlv_Header, sizeof(HTTPFlv_Header));                           // 2、发送flv头
+                FlvWriter_Ptr flvWriter = FlvWriterManager::ins()->flvWriter(_sessionId);  // 3、添加到列表
+                if (flvWriter) {
+                    flvWriter->addFlvWriterConn(shared_from_this());
+                }
+            } else {
+                LOG("async_read_some error %d\n", ec.value());
+                doClose();
             }
-        } else {
-            LOG("async_read_some error %d\n", ec.value());
-            doClose();
-        }
-    });
+        });
 }
 
 void FlvConn::doWrite(const char* data, int len)
@@ -78,7 +106,7 @@ void FlvConn::doClose()
 {
     asio::error_code ignored_ec;
     _socket.shutdown(asio::ip::tcp::socket::shutdown_both, ignored_ec);
-    FlvWriter_Ptr flvWriter = FlvWriterManager::ins()->flvWriter(_devID);
+    FlvWriter_Ptr flvWriter = FlvWriterManager::ins()->flvWriter(_sessionId);
     if (flvWriter) {
         flvWriter->delFlvWriterConn(shared_from_this());
     }

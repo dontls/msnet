@@ -37,8 +37,8 @@ class FlvWriterManager {
 public:
     static FlvWriterManager* ins();
 
-    FlvWriter_Ptr flvWriter(std::string devID);
-    void          delFlvWriter(std::string devID);
+    FlvWriter_Ptr flvWriter(std::string sessioId);
+    void          delFlvWriter(std::string sessioId);
 };
 
 #endif
