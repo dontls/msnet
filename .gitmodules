@@ -1,0 +1,6 @@
+[submodule "3rd/comm-inc"]
+	path = 3rd/comm-inc
+	url = https://github.com/donwg/comm-inc
+[submodule "3rd/faac"]
+	path = 3rd/faac
+	url = https://github.com/knik0/faac.git

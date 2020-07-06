@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<config>
+    <nginx>
+        <!--Nginx转发IP-->
+        <ip>172.16.50.219</ip>
+        <!--Nginx状态获取端口-->
+        <stat_port>8800</stat_port>
+    </nginx>
+    <device>
+        <!--最大同时链接数-->
+        <max_num>10</max_num>
+        <!--无人预览自动断开时间-->
+        <auto_close_time>30</auto_close_time>
+        <!--单路支持流量 单位M, 暂无效-->
+        <bytes_out>50</bytes_out>
+    </device>
+    <server>
+        <port>8899</port>
+    </server>
+</config>
