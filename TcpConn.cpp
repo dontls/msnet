@@ -10,7 +10,7 @@ TcpConn::~TcpConn() {}
 void TcpConn::start()
 {
     _isPublisherWait = true;
-    _isAutoClose = false;
+    _isManualClose = false;
     asio::ip::tcp::no_delay noDelay(true);
     _socket.set_option(noDelay);
     doRead();
@@ -40,11 +40,11 @@ bool TcpConn::dispatchMessage(char* data, int len)
         char* palyloadData = recvData + ho::MsgHeaderLen;
         switch (pMsgHeader->usCodeID) {
         case 0x1002:  //
-            doSocketBufferWrite(doRspMediaRegister(palyloadData, pMsgHeader->unPayloadLen));
+            doBufferWrite(doRspMediaRegister(palyloadData, pMsgHeader->unPayloadLen));
             break;
         case 0x0001:
             // doWrite(recvData, ho::MsgHeaderLen);
-            doSocketBufferWrite(doRspHeartbeat());
+            doBufferWrite(doRspHeartbeat());
             break;
         case 0x0011:  //
         {
@@ -78,41 +78,56 @@ bool TcpConn::dispatchMessage(char* data, int len)
     return true;
 }
 
-void TcpConn::autoClose()
+void TcpConn::setManualClose()
 {
-    _isAutoClose = true;
+    _isManualClose = true;
 }
 
 void TcpConn::doRead()
 {
     auto self(shared_from_this());
-    if (_isAutoClose) {
-        LOG("%s Auto Close\n", _sessionId.c_str());
-        _socket.close();
+    if (_isManualClose) {
+        LOG("%s manual close\n", _sessionId.c_str());
+        doClose();
         return;
     }
-    _socket.async_read_some(asio::buffer(_buffer), [this, self](std::error_code ec, std::size_t bytes_transferred) {
-        if (!ec && dispatchMessage(_buffer.data(), bytes_transferred)) {
+    _socket.async_read_some(asio::buffer(_buffer, BUFSIZ), [this, self](std::error_code ec, std::size_t bytes_transferred) {
+        if (!ec && dispatchMessage(_buffer, bytes_transferred)) {
             doRead();
         } else {
-            // TcpConnManager::ins()->removeTcpConn(_sessionId, 0, 0);
-            _socket.close();
+            doClose();
             LOG("async_read_some error %d\n", ec.value());
         }
     });
 }
 
-void TcpConn::doSocketWrite(char* data, int len)
+void TcpConn::doWrite(char* data, int len)
 {
-    asio::write(_socket, asio::buffer(data, len));
+    auto self(shared_from_this());
+    asio::async_write(_socket, asio::buffer(data, len), [this, self](std::error_code ec, std::size_t) {
+        if (!ec) {
+        } else {
+            LOG("async_write error %d\n", ec.value());
+            doClose();
+        }
+        // if (ec != asio::error::operation_aborted) {
+        // }
+    });
 }
 
-void TcpConn::doSocketBufferWrite(int len)
+void TcpConn::doBufferWrite(int len)
 {
     if (len > 0) {
         asio::write(_socket, asio::buffer(_sendBuffer.Bytes(), len));
         _sendBuffer.Remove(len);
     }
+}
+
+void TcpConn::doClose()
+{
+    // TcpConnManager::ins()->removeTcpConn(_sessionId, 0, 0);
+    asio::error_code ignored_ec;
+    _socket.shutdown(asio::ip::tcp::socket::shutdown_both, ignored_ec);   
 }
 
 // 消息头

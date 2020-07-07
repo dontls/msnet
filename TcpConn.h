@@ -10,30 +10,30 @@
 
 class TcpConn : public std::enable_shared_from_this<TcpConn> {
 private:
-    asio::ip::tcp::socket  _socket;
-    std::array<char, 8192> _buffer;
-    std::string            _sessionId;
-    bytes::Buffer          _recvBuffer;
-    bytes::Buffer          _sendBuffer;
-    Publisher_Ptr          _publisher;
-    bool                   _isPublisherWait;
-    bool                   _isAutoClose;
+    asio::ip::tcp::socket _socket;
+    char                  _buffer[BUFSIZ];
+    std::string           _sessionId;
+    bytes::Buffer         _recvBuffer;
+    bytes::Buffer         _sendBuffer;
+    Publisher_Ptr         _publisher;
+    bool                  _isPublisherWait;
+    bool                  _isManualClose;
 
 public:
     TcpConn(asio::ip::tcp::socket socket);
     TcpConn(asio::io_service& context);
     ~TcpConn();
-
-    void                   start();
-    bool                   dispatchMessage(char* data, int len);
     asio::ip::tcp::socket& socket();
 
-    void autoClose();
+    void start();
+    bool dispatchMessage(char* data, int len);
+    void setManualClose();
 
 private:
     void doRead();
-    void doSocketWrite(char* data, int len);
-    void doSocketBufferWrite(int len);
+    void doWrite(char* data, int len);
+    void doBufferWrite(int len);
+    void doClose();
     // 消息头
     int doRspMsgHeader(ho::MsgHeader_t msg);
     // 处理心跳
