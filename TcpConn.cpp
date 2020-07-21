@@ -125,7 +125,7 @@ void TcpConn::doBufferWrite(int len)
 
 void TcpConn::doClose()
 {
-    // TcpConnManager::ins()->removeTcpConn(_sessionId, 0, 0);
+    TcpConnManager::ins()->removeTcpConn(_sessionId, 0, 0);
     asio::error_code ignored_ec;
     _socket.shutdown(asio::ip::tcp::socket::shutdown_both, ignored_ec);   
 }
@@ -155,7 +155,7 @@ int TcpConn::doRspMediaRegister(char* req, int len)
         _isPublisherWait = false;
     }
     // 这里把设备添加到管理列表
-    // TcpConnManager::ins()->addTcpConn(_sessionId, shared_from_this());
+    TcpConnManager::ins()->addTcpConn(_sessionId, shared_from_this());
     doRspMsgHeader(ho::NewResponse(0x4002, payloadStr.length()));
     _sendBuffer.WriteString(payloadStr);
     return ho::MsgHeaderLen + payloadStr.length();

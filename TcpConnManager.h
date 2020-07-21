@@ -2,10 +2,9 @@
 #define TCPCON_MANAGER_H
 
 #include "TcpConn.h"
+#include "ThMutex.h"
 #include <map>
-#include <mutex>
 #include <string>
-#include <unordered_map>
 
 class TcpConnManager {
 public:
@@ -19,14 +18,14 @@ public:
     ~TcpConnManager();
     static TcpConnManager* ins();
 
-    bool addTcpConn(std::string devID, TcpConn_Ptr ss);
-    void removeTcpConn(std::string devID, int nclient, int nCloseTime);
+    bool addTcpConn(std::string sessionId, TcpConn_Ptr ss);
+    void removeTcpConn(std::string sessionId, int nclient, int nCloseTime);
 
 private:
     typedef std::map<std::string, STcpConn_t> TyMapTcpConn;
 
     TyMapTcpConn _tcpConnMap;
-    std::mutex   _mtx;
+    CommMutex    _mtx;
 };
 
 #endif
