@@ -20,7 +20,7 @@ typedef struct MediaHeader {
     unsigned long long ullFrameTimeStamp;
 } MediaHeader_t;
 
-#pragma
+#pragma pack()
 
 enum {
     KFrameType_Invalid = 0x0000,     //无效			//invalid
