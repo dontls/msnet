@@ -31,17 +31,23 @@ CXXFLAGS += $(CFLAGS) -std=c++11
 # Makefile build
 SRCS += $(foreach dir,$(DIRS),$(wildcard $(dir)/*.cpp))
 OBJS := $(patsubst %.cpp, %.o, $(filter %.cpp, $(SRCS)))
+SO := $(findstring .so, $(LIB-build))
 
 PHONY := all 
 all:: $(LIB-build) $(APP-build)
-	# $(Q)$(STRIP) $^
 	$(ECHO) -e "\033[36mDone $^\033[0m"
 
 $(LIB-build):: $(OBJS)
-	$(Q)$(CXX) -shared -Wl,-soname,$@ $(LDFLAGS) -o $@ $^ $>
+ifneq (, $(SO))
+	$(Q)$(CXX) -shared -fPIC -o $@ $^ $(LDFLAGS)
+	$(STRIP) $@
+else
+	$(Q)$(AR) -rcs $@ $^
+endif
 	 
 $(APP-build):: $(OBJS)
 	$(Q)$(CXX) -o $@ $^ $(LDFLAGS)
+	$(Q)$(STRIP) $@
 
 PHONY += clean
 clean: 
