@@ -1,12 +1,15 @@
 #ifndef __FLV_TAG_H__
 #define __FLV_TAG_H__
 
+#include "utils/LlocBytes.h"
 #include <stdio.h>
 #include <string.h>
 #include <string>
 
 class FlvTag {
 private:
+    LlocBytes _lBytes;
+
 public:
     FlvTag(/* args */) {}
     ~FlvTag() {}
@@ -14,8 +17,8 @@ public:
     // i/p frame
     std::string flvVideoTag(const char* raw, int len, bool isKey)
     {
-        char output[len + 9] = { 0 };
-        int  i = 0;
+        uint8_t* output = ( uint8_t* )_lBytes.Newlloc(len + 9);
+        int i = 0;
         // flv VideoTagHeader
         if (isKey) {
             output[i++] = 0x17;  // key frame, AVC
@@ -23,7 +26,9 @@ public:
             output[i++] = 0x27;  // p frame, AVC
         }
         output[i++] = 0x01;  // avc NALU unit
-        i += 3;
+        output[i++] = 0;
+        output[i++] = 0;
+        output[i++] = 0;
 
         output[i++] = (uint8_t)(len >> 24);  // nal length
         output[i++] = (uint8_t)(len >> 16);  // nal length
@@ -31,19 +36,21 @@ public:
         output[i++] = (uint8_t)(len);        // nal length
         memcpy(output + i, raw, len);
         i += len;
-        std::string ostr(output, i);
-        return ostr;
+        return std::string(( char* )output, i);
     }
 
     // sps/pps
     std::string flvMetaTag(const char* sps, int spsLen, const char* pps, int ppsLen)
     {
-        char output[spsLen + ppsLen + 16] = { 0 };
-        int  i = 0;
+        uint8_t* output = ( uint8_t* )_lBytes.Newlloc(spsLen + ppsLen + 16);
+        int      i = 0;
         // flv VideoTagHeader
         output[i++] = 0x17;  // key frame, AVC
-        i += 4;
-
+        output[i++] = 0;
+        output[i++] = 0;
+        output[i++] = 0;
+        output[i++] = 0;
+ 
         // flv VideoTagBody --AVCDecoderCOnfigurationRecord
         output[i++] = 0x01;    // configurationversion
         output[i++] = sps[1];  // avcprofileindication
@@ -61,25 +68,23 @@ public:
         output[i++] = (uint8_t)(ppsLen);       // picture parameter set length low 8 bits
         memcpy(output + i, pps, ppsLen);       // H264 picture parameter set
         i += ppsLen;
-        std::string ostr(output, i);
-        return ostr;
+        return std::string(( char* )output, i);
     }
 
     // audio
     std::string flvAudioTag(unsigned char* raw, int len, bool isSpec = false)
     {
-        char output[len + 2] = { 0 };
-        int  i = 0;
+        uint8_t* output = ( uint8_t* )_lBytes.Newlloc(len + 2);
+        int      i = 0;
         output[i++] = 0xAF;
         if (isSpec) {
-            i++;
+            output[i++] = 0x00;
         } else {
             output[i++] = 0x01;
         }
         memcpy(output + i, raw, len);
         i += len;
-        std::string ostr(output, i);
-        return ostr;
+        return std::string(( char* )output, i);
     }
 };
 

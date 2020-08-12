@@ -5,6 +5,7 @@
 #include "Log.h"
 #include "librtmp/log.h"
 #include "rtmp.h"
+#include "utils/LlocBytes.h"
 #include <string.h>
 #include <string>
 
@@ -14,6 +15,7 @@ class RtmpFlvWriter {
 private:
     RTMP*       _rtmp;
     const char* _errMsg;
+    LlocBytes   _packet;
 
     bool initUrl(const char* url)
     {
@@ -60,7 +62,7 @@ private:
         if (!_rtmp) {
             return -1;
         }
-        char        tBuffer[RTMP_HEAD_SIZE + bodyLen] = { 0 };
+        char*       tBuffer = _packet.Newlloc(RTMP_HEAD_SIZE + bodyLen);
         RTMPPacket* packet = ( RTMPPacket* )tBuffer;
         // RTMPPacket_Reset(packet);//重置packet状态
         packet->m_body = ( char* )packet + RTMP_HEAD_SIZE;
