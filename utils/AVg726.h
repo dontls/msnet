@@ -1,7 +1,6 @@
 #ifndef __AV_G726_H__
 #define __AV_G726_H__
 
-#include "AVfaac.h"
 #include "g7xx/g726.h"
 
 const int KFlagHisiLen = 4;

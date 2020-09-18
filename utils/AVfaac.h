@@ -43,9 +43,9 @@ public:
         pfaacEncConf->shortctl = SHORTCTL_NORMAL;
         pfaacEncConf->quantqual = 100;
         pfaacEncConf->bandWidth = 0;
-        pfaacEncConf->bitRate = 0;
-        pfaacEncConf->mpegVersion = MPEG4;
-        pfaacEncConf->version = MPEG4;
+        pfaacEncConf->bitRate = 44100;
+        pfaacEncConf->mpegVersion = MPEG2;
+        pfaacEncConf->version = MPEG2;
         faacEncSetConfiguration(_faacEnc, pfaacEncConf);
 
         unsigned char* pConfBuffer = 0;
