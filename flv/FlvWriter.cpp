@@ -32,12 +32,12 @@ bool FlvWriter::clearFlvWriterConn()
 }
 
 // tagType audio0x08/video0x09
-void FlvWriter::setFlvPacket(uint8_t tagType, std::string flvTag, unsigned long long apts, uint32_t vTagType)
+void FlvWriter::setFlvPacket(uint8_t tagType, std::string& flvTag, unsigned long long apts, bool isMeta)
 {
     std::string flvPacket = _flvMuxer.flvPacket(tagType, flvTag.c_str(), flvTag.length(), apts);
     CommRWLock  lock(&_mtx);
     for (auto c : _flvConns)
-        c->rawWriteFlvPacket(flvPacket.c_str(), flvPacket.length(), _aacSpec.c_str(), _aacSpec.length(), vTagType);
+        c->rawWriteFlvPacket(flvPacket.c_str(), flvPacket.length(), _aacSpec.c_str(), _aacSpec.length(), isMeta);
 }
 
 void FlvWriter::setSpecificConfig(std::string aacSpec)

@@ -72,12 +72,13 @@ void Publisher::recvAudioRaw(char* frame, int len, unsigned long long pts)
 #endif
 }
 
-void Publisher::publishAvcNaluRaw(std::string naluRaw, uint32_t abstamp)
+void Publisher::publishAvcNaluRaw(std::string& naluRaw, uint32_t abstamp)
 {
     const char* frameBuf = naluRaw.c_str();
     std::string ostr = "";
     int         frameLen = naluRaw.length();
     int         nut = frameBuf[0] & 0x1F;
+    bool        isMeta = false;
     switch (nut) {
     case avc::NALU_TYPE_SPS:
         _avcExt.sps = naluRaw;
@@ -88,6 +89,7 @@ void Publisher::publishAvcNaluRaw(std::string naluRaw, uint32_t abstamp)
             break;
         }
         ostr = _flvTag.flvMetaTag(_avcExt.sps.c_str(), _avcExt.sps.length(), _avcExt.pps.c_str(), _avcExt.pps.length());
+        isMeta = true;
         break;
     case avc::NALU_TYPE_SLICE:
         ostr = _flvTag.flvVideoTag(frameBuf, frameLen, false);
@@ -104,12 +106,53 @@ void Publisher::publishAvcNaluRaw(std::string naluRaw, uint32_t abstamp)
 
 #if defined(USE_FLV_SRV)
     // flv 0x09 tagType vedio 0x08 tagType audio
-    _flvWriter->setFlvPacket(0x09, ostr, abstamp, nut);
+    _flvWriter->setFlvPacket(0x09, ostr, abstamp, isMeta);
 #endif
 }
 
-void Publisher::publishHevcNaluRaw(std::string naluRaw, uint32_t abstamp) {}
+void Publisher::publishHevcNaluRaw(std::string& naluRaw, uint32_t abstamp)
+{
+    const char* frameBuf = naluRaw.c_str();
+    int         frameLen = naluRaw.length();
+    int         nut = (frameBuf[0] & 0x7E) >> 1;
+    std::string ostr = "";
+    bool        isMeta = false;
+    switch (nut) {
+    case hevc::NAL_UNIT_VPS:
+        _avcExt.vps = naluRaw;
+        break;
+    case hevc::NAL_UNIT_SPS:
+        _avcExt.sps = naluRaw;
+        break;
+    case hevc::NAL_UNIT_PPS:
+        _avcExt.pps = naluRaw;
+        if (_avcExt.sps.empty() || _avcExt.pps.empty() || _avcExt.vps.empty()) {
+            break;
+        }
+        ostr = _flvTag.flvHevcMetaTag(_avcExt.vps.c_str(), _avcExt.vps.length(), _avcExt.sps.c_str(),
+                                      _avcExt.sps.length(), _avcExt.pps.c_str(), _avcExt.pps.length());
+        isMeta = true;
+        break;
+    case hevc::NAL_UNIT_CODED_SLICE_TRAIL_R:
+        ostr = _flvTag.flvVideoTag(frameBuf, frameLen, false, true);
+        break;
+    case hevc::NAL_UNIT_CODED_SLICE_IDR:
+        ostr = _flvTag.flvVideoTag(frameBuf, frameLen, true, true);
+        break;
+    default:
+        break;
+    }
+    if (ostr == "") {
+        return;
+    }
+    // rtmp 已经处理过i帧不需要等
+    _rtmpFlvWriter->setAvcRtmpPacket(ostr, abstamp);
 
+#if defined(USE_FLV_SRV)
+    // flv 0x09 tagType vedio 0x08 tagType audio
+    _flvWriter->setFlvPacket(0x09, ostr, abstamp, isMeta);
+#endif
+}
 //
 void Publisher::frameFormat(char* frame)
 {

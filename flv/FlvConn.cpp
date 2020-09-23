@@ -22,16 +22,16 @@ void FlvConn::start()
     doRead();
 }
 
-void FlvConn::rawWriteFlvPacket(const char* data, uint32_t len, const char* aacSpec, uint32_t aacSpecLen, int vTagType)
+void FlvConn::rawWriteFlvPacket(const char* data, uint32_t len, const char* aacSpec, uint32_t aacSpecLen,  bool isMeta)
 {
     // 等待sps/pps 并且直发一次
-    if (_isWaitMeta && vTagType == 8) {
+    if (_isWaitMeta && isMeta) {
         _isWaitMeta = false;
     }
     if (_isWaitMeta) {
         return;
     }
-    if (vTagType == 8) {
+    if (isMeta) {
         doWrite(aacSpec, aacSpecLen);
     }
     doWrite(data, len);

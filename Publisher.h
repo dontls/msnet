@@ -38,8 +38,8 @@ public:
     void recvAudioRaw(char* frame, int len, unsigned long long pts);
 
 private:
-    void publishAvcNaluRaw(std::string naluRaw, uint32_t abstamp);
-    void publishHevcNaluRaw(std::string naluRaw, uint32_t abstamp);
+    void publishAvcNaluRaw(std::string& naluRaw, uint32_t abstamp);
+    void publishHevcNaluRaw(std::string& naluRaw, uint32_t abstamp);
     bool initWriter();
     void initAac();
     void frameFormat(char* frame);

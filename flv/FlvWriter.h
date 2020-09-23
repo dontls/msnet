@@ -24,7 +24,7 @@ public:
     bool clearFlvWriterConn();
 
     // tagType audio0x08/video0x09
-    void setFlvPacket(uint8_t tagType, std::string flvTag, unsigned long long apts, uint32_t vTagType = 0);
+    void setFlvPacket(uint8_t tagType, std::string& flvTag, unsigned long long apts, bool isMeta = false);
     void setSpecificConfig(std::string aacSpec);
 };
 

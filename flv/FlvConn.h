@@ -14,7 +14,7 @@ private:
 public:
     FlvConn(asio::ip::tcp::socket socket);
     void start();
-    void rawWriteFlvPacket(const char* data, uint32_t len, const char* aacSpec, uint32_t aacSpecLen, int vTagType);
+    void rawWriteFlvPacket(const char* data, uint32_t len, const char* aacSpec, uint32_t aacSpecLen, bool isMeta);
 
 private:
     void doRead();
