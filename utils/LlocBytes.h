@@ -36,6 +36,7 @@ public:
             _maxBytesLen = len;
         }
         assert(_bytes != nullptr);
+        memset(_bytes, 0, _maxBytesLen);
         return _bytes;
     }
 };
