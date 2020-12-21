@@ -1,6 +1,6 @@
 #pragma once
 
-#include "3rd/asio-1.12.2/asio.hpp"
+#include "asio.hpp"
 #include <memory>
 #include <vector>
 

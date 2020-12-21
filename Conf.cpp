@@ -1,6 +1,6 @@
 #include "Conf.h"
-#include "3rd/x2struct-1.1/thirdparty/rapidxml/rapidxml.hpp"
-#include "3rd/x2struct-1.1/thirdparty/rapidxml/rapidxml_utils.hpp"
+#include "x2struct/thirdparty/rapidxml/rapidxml.hpp"
+#include "x2struct/thirdparty/rapidxml/rapidxml_utils.hpp"
 static struct XmlConfig xmlConf;
 
 bool XmlConfigInit(const char* xmlPath)

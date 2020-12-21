@@ -1,7 +1,7 @@
 #ifndef __AVFAAC_H__
 #define __AVFAAC_H__
 
-#include "3rd/faac/include/faac.h"
+#include "faac.h"
 #include <string.h>
 
 enum {

@@ -4,3 +4,15 @@
 [submodule "3rd/faac"]
 	path = 3rd/faac
 	url = https://github.com/knik0/faac.git
+[submodule "comm-inc"]
+	path = comm-inc
+	url = https://github.com/donwg/comm-inc.git
+[submodule "x2struct"]
+	path = x2struct
+	url = https://github.com/xyz347/x2struct.git
+[submodule "coinc"]
+	path = coinc
+	url = https://github.com/donwg/coinc.git
+[submodule "faac"]
+	path = faac
+	url = https://github.com/knik0/faac.git

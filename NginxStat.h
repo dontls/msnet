@@ -7,8 +7,8 @@ struct StreamItem {
     int64_t     bytesOut;
 };
 
-#include "3rd/x2struct-1.1/thirdparty/rapidxml/rapidxml.hpp"
-#include "3rd/x2struct-1.1/thirdparty/rapidxml/rapidxml_print.hpp"
+#include "x2struct/thirdparty/rapidxml/rapidxml.hpp"
+#include "x2struct/thirdparty/rapidxml/rapidxml_print.hpp"
 #include "Asiohttp.h"
 #include "TcpConnManager.h"
 #include "Conf.h"

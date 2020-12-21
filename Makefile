@@ -2,15 +2,14 @@
 APP-build := msnet
 
 # 头文件路径
-INCLUDES += -I ./  -I ./3rd
-INCLUDES += -I ./3rd/comm-inc/include/common
-INCLUDES += -I ./3rd/asio-1.12.2  
-INCLUDES += -I ./3rd/x2struct-1.1 
-INCLUDES += -I ./3rd/faac
-INCLUDES += -I ./3rd/librtmp  
+INCLUDES += -I ./
+INCLUDES += -I ./coinc/common
+INCLUDES += -I ./asio-1.12.2  
+INCLUDES += -I ./faac/include
+INCLUDES += -I ./librtmp  
 INCLUDES += -I ./utils
 
-LDFLAGS += ./3rd/librtmp/librtmp.a ./3rd/faac/libfaac/.libs/libfaac.a
+LDFLAGS += ./librtmp/librtmp.a ./faac/libfaac/.libs/libfaac.a
 
 # LDFLAGS += -L/usr/local/lib -lavutil -lavformat -lavcodec
 
