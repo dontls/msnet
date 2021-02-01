@@ -35,7 +35,7 @@ private:
     void doBufferWrite(int len);
     void doClose();
     // 消息头
-    int doRspMsgHeader(ho::MsgHeader_t msg);
+    int doRspMsg(unsigned short code, const char* data, int dataLen);
     // 处理心跳
     int doRspHeartbeat();
     // 媒体链路注册响应

@@ -3,7 +3,7 @@ APP-build := msnet
 
 # 头文件路径
 INCLUDES += -I ./
-INCLUDES += -I ./coinc/common
+INCLUDES += -I ./inc/common
 INCLUDES += -I ./asio-1.12.2  
 INCLUDES += -I ./faac/include
 INCLUDES += -I ./librtmp  

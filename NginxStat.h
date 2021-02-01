@@ -7,11 +7,11 @@ struct StreamItem {
     int64_t     bytesOut;
 };
 
-#include "x2struct/thirdparty/rapidxml/rapidxml.hpp"
-#include "x2struct/thirdparty/rapidxml/rapidxml_print.hpp"
 #include "Asiohttp.h"
-#include "TcpConnManager.h"
 #include "Conf.h"
+#include "TcpConnManager.h"
+#include "rapidxml-1.13/rapidxml.hpp"
+#include "rapidxml-1.13/rapidxml_print.hpp"
 
 inline void doNginxStatAccess(XmlConfig* conf, const char* method, const char* page, const char* param)
 {

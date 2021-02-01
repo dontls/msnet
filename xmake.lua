@@ -7,7 +7,7 @@ add_defines(
 )
 
 add_includedirs(
-    "./coinc/common", 
+    "./inc/common", 
     "./asio-1.12.2", 
     "./faac/include", 
     "./librtmp",

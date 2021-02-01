@@ -1,10 +1,12 @@
 #include "TcpConn.h"
 #include "Log.h"
 #include "TcpBusiness.h"
-#include <iostream>
 #include "TcpConnManager.h"
+#include <iostream>
 
-TcpConn::TcpConn(asio::ip::tcp::socket socket) : _socket(std::move(socket)), _publisher(std::make_shared<Publisher>()) {}
+TcpConn::TcpConn(asio::ip::tcp::socket socket) : _socket(std::move(socket)), _publisher(std::make_shared<Publisher>())
+{
+}
 TcpConn::TcpConn(asio::io_service& context) : _socket(context), _publisher(std::make_shared<Publisher>()) {}
 TcpConn::~TcpConn() {}
 void TcpConn::start()
@@ -59,11 +61,11 @@ bool TcpConn::dispatchMessage(char* data, int len)
             case ho::KFrameType_Video_I:
             case ho::KFrameType_Video_P:
                 _publisher->recvVideoRaw(palyloadData + 12, pMsgHeader->unPayloadLen - 12, pMeHeader->usFrameType,
-                                             pMeHeader->ullFrameTimeStamp);
+                                         pMeHeader->ullFrameTimeStamp);
                 break;
             case ho::KFrameType_Audio:
                 _publisher->recvAudioRaw(palyloadData + 12, pMsgHeader->unPayloadLen - 12,
-                                             pMeHeader->ullFrameTimeStamp);
+                                         pMeHeader->ullFrameTimeStamp);
                 break;
             default:
                 break;
@@ -91,14 +93,15 @@ void TcpConn::doRead()
         doClose();
         return;
     }
-    _socket.async_read_some(asio::buffer(_buffer, BUFSIZ), [this, self](std::error_code ec, std::size_t bytes_transferred) {
-        if (!ec && dispatchMessage(_buffer, bytes_transferred)) {
-            doRead();
-        } else {
-            doClose();
-            LOG("async_read_some error %d\n", ec.value());
-        }
-    });
+    _socket.async_read_some(asio::buffer(_buffer, BUFSIZ),
+                            [this, self](std::error_code ec, std::size_t bytes_transferred) {
+                                if (!ec && dispatchMessage(_buffer, bytes_transferred)) {
+                                    doRead();
+                                } else {
+                                    doClose();
+                                    LOG("async_read_some error %d\n", ec.value());
+                                }
+                            });
 }
 
 void TcpConn::doWrite(char* data, int len)
@@ -127,36 +130,41 @@ void TcpConn::doClose()
 {
     TcpConnManager::ins()->removeTcpConn(_sessionId, 0, 0);
     asio::error_code ignored_ec;
-    _socket.shutdown(asio::ip::tcp::socket::shutdown_both, ignored_ec);   
+    _socket.shutdown(asio::ip::tcp::socket::shutdown_both, ignored_ec);
 }
 
 // 消息头
-int TcpConn::doRspMsgHeader(ho::MsgHeader_t msg)
+int TcpConn::doRspMsg(unsigned short code, const char* data, int dataLen)
 {
-    _sendBuffer.Write(( char* )&msg, ho::MsgHeaderLen);
-    return ho::MsgHeaderLen;
+    if (NULL == data) {
+        dataLen = 0;
+    }
+    ho::MsgHeader_t header = ho::newResponse(code, dataLen);
+    _sendBuffer.Write(( char* )&header, ho::MsgHeaderLen);
+    if (data) {
+        _sendBuffer.Write(( char* )data, dataLen);
+    }
+    return ho::MsgHeaderLen + dataLen;
 }
 
 // 处理心跳
 int TcpConn::doRspHeartbeat()
 {
-    return doRspMsgHeader(ho::NewResponse(0x0001, 0));
+    return doRspMsg(0x0001, NULL, 0);
 }
 
 // 媒体链路注册响应
 int TcpConn::doRspMediaRegister(char* req, int len)
 {
     LOG("%s\n", req);
-    std::string payloadStr = ho::DoRegisterMediaLink(req, len, _sessionId);
+    std::string payloadStr = ho::doParseRegister(req, len, _sessionId);
     if (payloadStr.empty()) {
         return 0;
     }
-    if(_publisher->initSession(_sessionId)) {
+    if (_publisher->initSession(_sessionId)) {
         _isPublisherWait = false;
     }
     // 这里把设备添加到管理列表
     TcpConnManager::ins()->addTcpConn(_sessionId, shared_from_this());
-    doRspMsgHeader(ho::NewResponse(0x4002, payloadStr.length()));
-    _sendBuffer.WriteString(payloadStr);
-    return ho::MsgHeaderLen + payloadStr.length();
+    return doRspMsg(0x4002, payloadStr.c_str(), payloadStr.length());
 }
