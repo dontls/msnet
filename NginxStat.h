@@ -9,14 +9,14 @@ struct StreamItem {
 
 #include "Asiohttp.h"
 #include "Conf.h"
-#include "TcpConnManager.h"
+#include "TcpBusinessMnger.h"
 #include "rapidxml-1.13/rapidxml.hpp"
 #include "rapidxml-1.13/rapidxml_print.hpp"
 
 inline void doNginxStatAccess(XmlConfig* conf, const char* method, const char* page, const char* param)
 {
     Asiohttp http;
-    http.initUrl(conf->nginx.ip.c_str(), conf->nginx.stat_port.c_str());
+    http.initAddress(conf->nginx.ip.c_str(), conf->nginx.stat_port.c_str());
     std::string reponse;
     if (!strcmp(method, "POST")) {
         http.post(page, param, reponse);
@@ -34,19 +34,18 @@ inline void doNginxStatAccess(XmlConfig* conf, const char* method, const char* p
     if (streamNode == NULL) {
         return;
     }
-    auto TcpConnManager = TcpConnManager::ins();
+    auto mnger = TcpBusinessMnger::ins();
     while (streamNode) {
-        if (strcmp(streamNode->name(), "stream") == 0) {
-            StreamItem st;
-            st.name = streamNode->first_node("name")->value();
-            st.bytesOut = atoi(streamNode->first_node("bytes_out")->value());
-            st.clis = atoi(streamNode->first_node("nclients")->value());
-            std::cout << "name " << st.name << " bytes_out " << st.bytesOut << " nclients " << st.clis << "\n";
-            TcpConnManager->removeTcpConn(st.name, st.clis, conf->dev.auto_close_time);
-            streamNode = streamNode->next_sibling();
-        } else {
+        if (strcmp(streamNode->name(), "stream") != 0) {
             break;
         }
+        StreamItem st;
+        st.name = streamNode->first_node("name")->value();
+        st.bytesOut = atoi(streamNode->first_node("bytes_out")->value());
+        st.clis = atoi(streamNode->first_node("nclients")->value());
+        std::cout << "name " << st.name << " bytes_out " << st.bytesOut << " nclients " << st.clis << "\n";
+        mnger->remove(st.name, st.clis, conf->dev.auto_close_time);
+        streamNode = streamNode->next_sibling();
     }
 }
 

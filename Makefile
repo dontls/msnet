@@ -31,7 +31,7 @@ SRCS += Publisher.cpp \
 		TcpBusiness.cpp \
 		Conf.cpp \
 		TcpConn.cpp \
-		TcpConnManager.cpp \
+		TcpBusinessMnger.cpp \
 		rtmp/RtmpWriter.cpp \
 		Main.cpp \
 

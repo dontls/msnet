@@ -5,42 +5,36 @@
 //
 #include "ByteBuffer.h"
 #include "CommDef.h"
-#include "Publisher.h"
 #include <string>
 
 class TcpConn : public std::enable_shared_from_this<TcpConn> {
 private:
     asio::ip::tcp::socket _socket;
     char                  _buffer[BUFSIZ];
-    std::string           _sessionId;
     bytes::Buffer         _recvBuffer;
     bytes::Buffer         _sendBuffer;
-    Publisher_Ptr         _publisher;
-    bool                  _isPublisherWait;
-    bool                  _isManualClose;
+    std::atomic_bool      _writelock;
 
 public:
-    TcpConn(asio::ip::tcp::socket socket);
+    TcpConn(asio::ip::tcp::socket& socket);
     TcpConn(asio::io_service& context);
-    ~TcpConn();
+    virtual ~TcpConn();
     asio::ip::tcp::socket& socket();
 
     void start();
-    bool dispatchMessage(char* data, int len);
-    void setManualClose();
+    void stop();
+    bool writeBytes(char* data, int len);
+    // dispatchMessage return vaild data length
+    // if < 0 An error occurred, if = 0 need more data
+    virtual int  dispatchMessage(char* data, int len) = 0;
+    virtual void online() = 0;
+    virtual void offline() = 0;
 
 private:
-    void doRead();
-    void doWrite(char* data, int len);
-    void doBufferWrite(int len);
-    void doClose();
-    // 消息头
-    int doRspMsg(unsigned short code, const char* data, int dataLen);
-    // 处理心跳
-    int doRspHeartbeat();
-    // 媒体链路注册响应
-    int doRspMediaRegister(char* req, int len);
+    bool processReceiveData();
+    void actionRead();
+    void actionWrite();
+    void handleClose();
 };
-typedef std::shared_ptr<TcpConn> TcpConn_Ptr;
 
 #endif  // !TcpConn_H

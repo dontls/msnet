@@ -2,7 +2,7 @@
 #define TCP_POOLSERVER_H
 
 #include "AsioPool.h"
-#include "TcpConn.h"
+#include "TcpBusiness.h"
 
 class TcpPoolServer : public noncopyable {
     IoServicePool           _ioSrvPool;  // 这里必须定义在_acceptor前面
@@ -27,8 +27,8 @@ public:
 private:
     void doAccept()
     {
-        TcpConn_Ptr newConn(new TcpConn(_ioSrvPool.ioService()));
-        auto&          socket = newConn->socket();
+        TcpBusiness_Ptr newConn(new TcpBusiness(_ioSrvPool.ioService()));
+        auto&       socket = newConn->socket();
         _acceptor.async_accept(socket, [this, newConn = std::move(newConn)](const asio::error_code& err) {
             if (!err) {
                 newConn->start();

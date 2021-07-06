@@ -16,7 +16,7 @@ public:
     Asiohttp(/* args */) {}
     ~Asiohttp() {}
 
-    void initUrl(const char* host, const char* port)
+    void initAddress(const char* host, const char* port)
     {
         _host = host;
         _port = port;
