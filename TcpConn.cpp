@@ -2,11 +2,17 @@
 #include "Log.h"
 #include <iostream>
 
+const int _maxBufferSize = 1024 * 500;
+
 TcpConn::TcpConn(asio::ip::tcp::socket& socket)
-    : _socket(std::move(socket)), _recvBuffer(1024 * 50), _sendBuffer(1024 * 50)
+    : _socket(std::move(socket)), _recvBuffer(_maxBufferSize), _sendBuffer(_maxBufferSize)
 {
 }
-TcpConn::TcpConn(asio::io_service& context) : _socket(context), _recvBuffer(1024 * 50), _sendBuffer(1024 * 50) {}
+
+TcpConn::TcpConn(asio::io_service& context) : _socket(context), _recvBuffer(_maxBufferSize), _sendBuffer(_maxBufferSize)
+{
+}
+
 TcpConn::~TcpConn() {}
 void TcpConn::start()
 {
@@ -28,10 +34,12 @@ void TcpConn::stop()
     _socket.shutdown(asio::ip::tcp::socket::shutdown_both, ignored_ec);
 }
 
-bool TcpConn::writeBytes(char* data, int len)
+bool TcpConn::writeBytes(bytesArray* data, int size)
 {
-    if (_sendBuffer.Write(data, len) != len) {
-        return false;
+    for (int i = 0; i < size; i++) {
+        if (_sendBuffer.Write(data[i].buf, data[i].length) != data[i].length) {
+            return false;
+        }
     }
     actionWrite();
     return true;

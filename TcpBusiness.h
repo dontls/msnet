@@ -27,7 +27,7 @@ public:
 
 private:
     // 消息头
-    int doRspMsg(unsigned short code, const char* data, int dataLen);
+    int doRspMsg(unsigned short code, const char* data = NULL, int dataLen = 0);
     // 处理心跳
     int doRspHeartbeat();
     // 媒体链路注册响应

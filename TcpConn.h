@@ -7,6 +7,11 @@
 #include "CommDef.h"
 #include <string>
 
+typedef struct bytesArray {
+    char* buf;
+    int   length;
+};
+
 class TcpConn : public std::enable_shared_from_this<TcpConn> {
 private:
     asio::ip::tcp::socket _socket;
@@ -23,9 +28,8 @@ public:
 
     void start();
     void stop();
-    bool writeBytes(char* data, int len);
-    // dispatchMessage return vaild data length
-    // if < 0 An error occurred, if = 0 need more data
+    bool writeBytes(bytesArray* data, int size);
+    // dispatchMessage return vaild data length; if < 0 An error occurred, if = 0 need more data
     virtual int  dispatchMessage(char* data, int len) = 0;
     virtual void online() = 0;
     virtual void offline() = 0;

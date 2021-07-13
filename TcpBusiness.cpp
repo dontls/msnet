@@ -90,21 +90,23 @@ int TcpBusiness::dispatchMessage(char* data, int len)
 // 消息头
 int TcpBusiness::doRspMsg(unsigned short code, const char* data, int dataLen)
 {
-    if (NULL == data) {
-        dataLen = 0;
-    }
+    bytesArray      bufs[2];
     ho::MsgHeader_t header = ho::newResponse(code, dataLen);
-    writeBytes(( char* )&header, ho::MsgHeaderLen);
-    if (data) {
-        writeBytes(( char* )data, dataLen);
+    int             idx = 0;
+    bufs[idx].buf = ( char* )&header;
+    bufs[idx++].length = ho::MsgHeaderLen;
+    if (dataLen > 0 && data != NULL) {
+        bufs[idx].buf = ( char* )data;
+        bufs[idx++].length = dataLen;
     }
+    writeBytes(bufs, idx);
     return ho::MsgHeaderLen + dataLen;
 }
 
 // 处理心跳
 int TcpBusiness::doRspHeartbeat()
 {
-    return doRspMsg(0x0001, NULL, 0);
+    return doRspMsg(0x0001);
 }
 
 // 媒体链路注册响应
