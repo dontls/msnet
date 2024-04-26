@@ -38,9 +38,9 @@ void Publisher::recvVideoRaw(char* frame, size_t len, int type, long long pts) {
   // _mp4Writer.writeVideoframe(frame, len, type, pts);
   long apts = (pts - _startAVTime) / 1000;
   for (const auto& it : nalus) {
-    _publishFunc(it.data, it.size, apts);
+    _publishFunc(it.data+4, it.size-4, apts);
   }
-  _publishFunc(ptr, len, apts);
+  _publishFunc(ptr+4, len-4, apts);
 }
 
 // 发送AAC RTMP包

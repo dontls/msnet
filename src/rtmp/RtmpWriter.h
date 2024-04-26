@@ -29,7 +29,7 @@ class RtmpWriter {
   AVg726 _avg726;
 #else
   RTMP* _rtmp;
-  std::function<int(RTMP*, char*, int, long)> _publishFunc;
+  std::function<int(RTMP*, char*, int, uint32_t)> _publishFunc;
 #endif
   // fpWriter    _g726Writer;
   // AVmp4       _mp4Writer;

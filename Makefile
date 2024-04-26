@@ -25,7 +25,7 @@ CXXFLAGS += -DUSE_FLV_SRV
 LDFLAGS += -ldl -lrt -pthread -Wl,-rpath=./
 
 # 源文件
-DIRS += src/g7xx src/flv src
+DIRS += src/g7xx src/flv src/rtmp src 
 SRCS += Main.cpp
 
 -include scripts/compile.mk

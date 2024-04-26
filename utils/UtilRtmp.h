@@ -189,24 +189,22 @@ int SendPacket(RTMP* r, unsigned int nPacketType, unsigned char* data,
 }
 
 // H264 RTMP
-int Send264Videoframe(RTMP* r, std::string strNalu, uint32_t dts) {
-  unsigned char* frameBuf = (unsigned char*)strNalu.c_str();
-  int frameLen = strNalu.length();
-  int nut = frameBuf[0] & 0x1F;
+int Send264Videoframe(RTMP* r, char* data, int len, uint32_t dts) {
+  int nut = data[0] & 0x1F;
   static AvcExtData_t avcExt;
   switch (nut) {
     case avc::NALU_TYPE_SPS:
-      avcExt.sps = strNalu;
+      avcExt.sps = std::string(data, len);
       break;
     case avc::NALU_TYPE_PPS:
-      avcExt.pps = strNalu;
+      avcExt.pps = std::string(data, len);
       break;
     case avc::NALU_TYPE_SLICE:
     case avc::NALU_TYPE_IDR: {
       if (avcExt.sps.empty() || avcExt.pps.empty()) {
         break;
       }
-      unsigned char body[frameLen + 9] = {0};
+      unsigned char body[len + 9] = {0};
       int i = 0;
       int bRet = 0;
       if (nut == avc::NALU_TYPE_IDR) {
@@ -223,13 +221,13 @@ int Send264Videoframe(RTMP* r, std::string strNalu, uint32_t dts) {
       body[i++] = 0x01;  // AVC NALU
       i += 3;            // 3个字节的0x00
       // NALU size
-      body[i++] = frameLen >> 24 & 0xff;
-      body[i++] = frameLen >> 16 & 0xff;
-      body[i++] = frameLen >> 8 & 0xff;
-      body[i++] = frameLen & 0xff;
+      body[i++] = len >> 24 & 0xff;
+      body[i++] = len >> 16 & 0xff;
+      body[i++] = len >> 8 & 0xff;
+      body[i++] = len & 0xff;
       // NALU data
-      memcpy(&body[i], frameBuf, frameLen);
-      return SendPacket(r, RTMP_PACKET_TYPE_VIDEO, body, i + frameLen, dts);
+      memcpy(&body[i], data, len);
+      return SendPacket(r, RTMP_PACKET_TYPE_VIDEO, body, i + len, dts);
     } break;
     default:
       break;
@@ -238,27 +236,25 @@ int Send264Videoframe(RTMP* r, std::string strNalu, uint32_t dts) {
 }
 
 // H265 RTMP
-int Send265Videoframe(RTMP* r, std::string strNalu, uint32_t dts) {
-  unsigned char* frameBuf = (unsigned char*)strNalu.c_str();
-  int frameLen = strNalu.length();
-  int nut = (frameBuf[0] & 0x7E) >> 1;
+int Send265Videoframe(RTMP* r, char* data, int len, uint32_t dts) {
+  int nut = (data[0] & 0x7E) >> 1;
   static AvcExtData_t avcExt;
   switch (nut) {
     case hevc::NALU_TYPE_SPS:
-      avcExt.sps = strNalu;
+      avcExt.sps = std::string(data, len);
       break;
     case hevc::NALU_TYPE_PPS:
-      avcExt.pps = strNalu;
+      avcExt.pps = std::string(data, len);
       break;
     case hevc::NALU_TYPE_VPS:
-      avcExt.vps = strNalu;
+      avcExt.vps = std::string(data, len);
       break;
     case hevc::NALU_TYPE_CODED_SLICE_TRAIL_R:
     case hevc::NALU_TYPE_CODED_SLICE_IDR: {
       if (avcExt.sps.empty() || avcExt.pps.empty() || avcExt.vps.empty()) {
         break;
       }
-      unsigned char body[frameLen + 9] = {0};
+      unsigned char body[len + 9] = {0};
       int i = 0;
       int bRet = 0;
       if (nut == hevc::NALU_TYPE_CODED_SLICE_IDR) {
@@ -276,13 +272,13 @@ int Send265Videoframe(RTMP* r, std::string strNalu, uint32_t dts) {
       body[i++] = 0x01;  // AVC NALU
       i += 3;            // 3个字节的0x00
       // NALU size
-      body[i++] = frameLen >> 24 & 0xff;
-      body[i++] = frameLen >> 16 & 0xff;
-      body[i++] = frameLen >> 8 & 0xff;
-      body[i++] = frameLen & 0xff;
+      body[i++] = len >> 24 & 0xff;
+      body[i++] = len >> 16 & 0xff;
+      body[i++] = len >> 8 & 0xff;
+      body[i++] = len & 0xff;
       // NALU data
-      memcpy(&body[i], frameBuf, frameLen);
-      return SendPacket(r, RTMP_PACKET_TYPE_VIDEO, body, i + frameLen, dts);
+      memcpy(&body[i], data, len);
+      return SendPacket(r, RTMP_PACKET_TYPE_VIDEO, body, i + len, dts);
     } break;
     default:
       break;
@@ -302,6 +298,7 @@ int SendAccAudioframe(RTMP* r, unsigned char* data, int len, uint32_t dts,
     body[i++] = 0x00;
   memcpy(&body[i], data, len);
   SendPacket(r, RTMP_PACKET_TYPE_AUDIO, body, i + len, dts);
+  return 0;
 }
 
 #endif

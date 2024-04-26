@@ -1,21 +1,21 @@
 add_rules("mode.debug", "mode.release")
 
 add_defines(
-    "ASIO_STANDALONE",
-    "ASIO_HAS_STD_CHRONO",
     "USE_FLV_SRV"
 )
 
 add_includedirs(
-    "./inc/common", 
+    "./inc", 
     "./asio-1.12.2", 
     "./faac/include", 
-    "./librtmp",
     "./utils",
+    "./src",
     "./"
 )
 
 add_links(
+    "./librtmp/librtmp.a",
+    "./faac/libfaac/.libs/libfaac.a",
     "pthread"
 )
 
@@ -25,16 +25,13 @@ add_cxflags(
 
 target("./msnet")
     set_kind("binary")
+
     add_files(
-        "./librtmp/librtmp.a",
-        "./faac/libfaac/.libs/libfaac.a"
-    )
-    add_files(
-        "utils/*.cpp",
-        "flv/*.cpp",
-        "g7xx/*.cpp",
-        "rtmp/*.cpp",
-        "./*.cpp"
+        "src/g7xx/*.cpp",
+        "src/flv/*.cpp",
+        "src/rtmp/*.cpp",
+        "src/*.cpp",
+        "Main.cpp"
     )
 --
 -- If you want to known more usage about xmake, please see https://xmake.io

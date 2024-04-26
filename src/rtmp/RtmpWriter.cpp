@@ -185,9 +185,9 @@ void RtmpWriter::publishVideoframe(char* frame, size_t len, int type,
   // _mp4Writer.writeVideoframe(frame, len, type, pts);
   uint32_t dts = (pts - _startVTime) / 1000;
   for (const auto& it : nalus) {
-    _publishFunc(_rtmp, it.data, it.size, dts);
+    _publishFunc(_rtmp, it.data+4, it.size-4, dts);
   }
-  _publishFunc(_rtmp, ptr, len, dts);
+  _publishFunc(_rtmp, ptr+4, len-4, dts);
 }
 
 // 发送AAC RTMP包
