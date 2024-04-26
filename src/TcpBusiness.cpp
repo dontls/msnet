@@ -1,5 +1,6 @@
 #include "TcpBusiness.h"
 #include "TcpBusinessMnger.h"
+#include "log.hpp"
 #include "nlohmann/json.hpp"
 #include <memory>
 namespace ho {
@@ -36,11 +37,11 @@ void TcpBusiness::online()
 
 void TcpBusiness::offline()
 {
-    LOG("%s close\n", _sessionId.c_str());
+    LogDebug("%s close\n", _sessionId.c_str());
     TcpBusinessMnger::ins()->remove(_sessionId, 0, 0);
 }
 
-int TcpBusiness::dispatchMessage(char* data, int len)
+int TcpBusiness::dispatchMessage(char* data, size_t len)
 {
     if (len < ho::MsgHeaderLen) {
         return 0;
@@ -112,7 +113,7 @@ int TcpBusiness::doRspHeartbeat()
 // 媒体链路注册响应
 int TcpBusiness::doRspMediaRegister(char* req, int len)
 {
-    LOG("%s\n", req);
+    LogDebug("%s\n", req);
     std::string payloadStr = ho::doParseRegister(req, len, _sessionId);
     if (payloadStr.empty()) {
         return 0;

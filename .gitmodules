@@ -3,4 +3,4 @@
 	url = https://github.com/knik0/faac.git
 [submodule "inc"]
 	path = inc
-	url = https://github.com/wlgd/inc.git
+	url = https://github.com/dontls/inc.git
