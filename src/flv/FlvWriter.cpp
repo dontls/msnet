@@ -30,19 +30,13 @@ bool FlvWriter::clearFlvWriterConn() {
 }
 
 // tagType audio0x08/video0x09
-void FlvWriter::setFlvPacket(uint8_t tagType, std::string& flvTag,
-                             unsigned long long apts, bool isMeta) {
-  std::string flvPacket =
-      _flvMuxer.flvPacket(tagType, flvTag.c_str(), flvTag.length(), apts);
-  std::lock_guard<std::mutex> lock(_mtx);
-  for (auto c : _flvConns)
-    c->rawWriteFlvPacket(flvPacket.c_str(), flvPacket.length(),
-                         _aacSpec.c_str(), _aacSpec.length(), isMeta);
+void FlvWriter::WriteFrame(char* data, size_t n, bool bkey) {
+  for (auto c : _flvConns) {
+    c->Write(data, n, bkey, _aacSpec);
+  }
 }
 
-void FlvWriter::setSpecificConfig(std::string aacSpec) {
-  _aacSpec = _flvMuxer.flvPacket(0x08, aacSpec.c_str(), aacSpec.length(), 0);
-}
+void FlvWriter::WriteAACSpec(std::string& s) { _aacSpec = s; }
 
 FlvWriterManager* FlvWriterManager::ins() {
   static FlvWriterManager ins;

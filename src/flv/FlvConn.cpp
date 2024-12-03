@@ -17,27 +17,24 @@ const std::string HTTPFlv_Rsp =
     "\r\n";
 
 FlvConn::FlvConn(asio::ip::tcp::socket socket)
-    : _socket(std::move(socket)), _isWaitMeta(true) {}
+    : _socket(std::move(socket)), bWaitKey_(true) {}
 void FlvConn::start() {
   asio::ip::tcp::no_delay noDelay(true);
   _socket.set_option(noDelay);
   doRead();
 }
 
-void FlvConn::rawWriteFlvPacket(const char* data, uint32_t len,
-                                const char* aacSpec, uint32_t aacSpecLen,
-                                bool isMeta) {
-  // 等待sps/pps 并且直发一次
-  if (_isWaitMeta && isMeta) {
-    _isWaitMeta = false;
+void FlvConn::Write(char* data, size_t n, bool bkey, std::string& aacspec) {
+  if (bWaitKey_ && bkey) {
+    bWaitKey_ = false;
   }
-  if (_isWaitMeta) {
+  if (bWaitKey_) {
     return;
   }
-  if (isMeta) {
-    doWrite(aacSpec, aacSpecLen);
+  if (bkey) {
+    doWrite(aacspec.c_str(), aacspec.length());
   }
-  doWrite(data, len);
+  doWrite(data, n);
 }
 
 // http://localhost:10600/live/session1222222222222222222222.flv

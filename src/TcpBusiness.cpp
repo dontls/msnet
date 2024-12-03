@@ -72,11 +72,11 @@ int TcpBusiness::dispatchMessage(char* data, size_t len)
         switch (pMeHeader->usFrameType) {
         case ho::KFrameType_Video_I:
         case ho::KFrameType_Video_P:
-            _publisher->recvVideoRaw(palyloadData + 12, pMsgHeader->unPayloadLen - 12, pMeHeader->usFrameType,
+            _publisher->onRawVideo(palyloadData + 12, pMsgHeader->unPayloadLen - 12, pMeHeader->usFrameType,
                                      pMeHeader->ullFrameTimeStamp);
             break;
         case ho::KFrameType_Audio:
-            _publisher->recvAudioRaw(palyloadData + 12, pMsgHeader->unPayloadLen - 12, pMeHeader->ullFrameTimeStamp);
+            _publisher->onRawAudio(palyloadData + 12, pMsgHeader->unPayloadLen - 12, pMeHeader->ullFrameTimeStamp);
             break;
         default:
             break;

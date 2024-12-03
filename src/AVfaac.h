@@ -18,7 +18,7 @@ class AVfaac {
   int _nSpecialLen;
   char _nDuration;  // 采样间隔ms
   unsigned char* _pOutputBytes;
-  unsigned char _cSpecialData[8];  // 音频特殊信息
+  char _cSpecialData[8];  // 音频特殊信息
 
  public:
   AVfaac(/* args */) {
@@ -76,7 +76,7 @@ class AVfaac {
   }
 
   // 编码 返回编码后数据长度
-  unsigned char* encode(unsigned char* pcmData, long dataLen, int& accLen) {
+  char* encode(char* pcmData, long dataLen, int& accLen) {
     if (NULL == _faacEnc) {
       return 0;
     }
@@ -91,13 +91,13 @@ class AVfaac {
       break;
     }
     accLen = nEncDataLen;
-    return _pOutputBytes;
+    return (char*)_pOutputBytes;
   }
 
   // 播放时间周期
   int duration() { return _nDuration; }
 
-  unsigned char* specialData(int* len) {
+  char* specialData(int* len) {
     *len = _nSpecialLen;
     return _cSpecialData;
   }

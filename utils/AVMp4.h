@@ -9,7 +9,7 @@ extern "C" {
 #include "sps.hpp"
 #include <string>
 
-class AVmp4 {
+class AVMp4 {
  private:
   AVFormatContext* _pOfmtCtx;
   std::string _pfpName;
@@ -28,14 +28,14 @@ class AVmp4 {
   AVg726ToAac _g726ToAac;
 
  public:
-  AVmp4(/* args */) {
+  AVMp4(/* args */) {
     _pOfmtCtx = NULL;
     _nfps = 0;
     _isWaitKeyframe = true;
     _nframeType = AV_CODEC_ID_NONE;
     _g726ToAac.init(AAC_STREAM_ADTS);
   }
-  ~AVmp4() {
+  ~AVMp4() {
     if (NULL != _pOfmtCtx) {
       av_write_trailer(_pOfmtCtx);
       avio_closep(&_pOfmtCtx->pb);

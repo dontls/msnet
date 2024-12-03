@@ -2,17 +2,16 @@
 #define FLVWRITER_H
 
 #include "FlvConn.h"
-#include "FlvMuxer.h"
 #include <mutex>
 #include <map>
 #include <set>
 #include <string>
+#include "buffer.hpp"
 
 class FlvWriter {
  private:
   std::mutex _mtx;
   std::set<FlvConn_Ptr> _flvConns;
-  FlvMuxer _flvMuxer;
   std::string _aacSpec;  // 记录aac spec
  public:
   FlvWriter(/* args */);
@@ -24,9 +23,8 @@ class FlvWriter {
   bool clearFlvWriterConn();
 
   // tagType audio0x08/video0x09
-  void setFlvPacket(uint8_t tagType, std::string& flvTag,
-                    unsigned long long apts, bool isMeta = false);
-  void setSpecificConfig(std::string aacSpec);
+  void WriteFrame(char* data, size_t n, bool bkey);
+  void WriteAACSpec(std::string& s);
 };
 
 typedef std::shared_ptr<FlvWriter> FlvWriter_Ptr;

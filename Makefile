@@ -19,7 +19,6 @@ DIRS += srs
 endif
 # 编译选项
 CXXFLAGS += $(INCLUDES)
-CXXFLAGS += -DUSE_FLV_SRV
 
 # 生成可执行程序链接库
 LDFLAGS += -ldl -lrt -pthread -Wl,-rpath=./

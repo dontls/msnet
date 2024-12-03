@@ -9,13 +9,12 @@ class FlvConn : public std::enable_shared_from_this<FlvConn> {
   char _buffer[BUFSIZ];
   unsigned long long _startTick;
   std::string _sessionId;
-  bool _isWaitMeta;
+  bool bWaitKey_;
 
  public:
   FlvConn(asio::ip::tcp::socket socket);
   void start();
-  void rawWriteFlvPacket(const char* data, uint32_t len, const char* aacSpec,
-                         uint32_t aacSpecLen, bool isMeta);
+  void Write(char* data, size_t n, bool bmeta, std::string& aacspec);
 
  private:
   void doRead();

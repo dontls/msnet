@@ -44,9 +44,9 @@ class AVg726ToAac {
     }
   }
 
-  unsigned char* aacSpecialData(int* len) { return _avfaac->specialData(len); }
+  char* aacSpecialData(int* len) { return _avfaac->specialData(len); }
 
-  unsigned char* toAacEncodec(char* data, int len, int& aacLen) {
+  char* toAacEncodec(char* data, int len, int& aacLen) {
     aacLen = 0;
     // 海思G726转PCM
     // int reLen = KAmpBufSize - _nAmpOffset;
@@ -61,10 +61,8 @@ class AVg726ToAac {
     if (_nAmpOffset < KAmpBufSize) {
       return NULL;
     }
-
     // PCM编码AAC
-    unsigned char* aac =
-        _avfaac->encode((unsigned char*)_pAmpBuffer, KAmpBufSize, aacLen);
+    char* aac = _avfaac->encode(_pAmpBuffer, KAmpBufSize, aacLen);
     if (aacLen == 0) {
       return NULL;
     }

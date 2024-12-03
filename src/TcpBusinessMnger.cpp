@@ -37,7 +37,7 @@ void TcpBusinessMnger::remove(std::string sessionId, int nclient,
     return;
   }
   // 没有消费者， 超时判断断开连接
-  if (!libtime::Since(stc.tick, ncloseTime)) {
+  if (libtime::Since(stc.tick) < ncloseTime) {
     return;
   }
   stc.business->stop();
